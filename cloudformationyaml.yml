@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A sample template
+
+Parameters:
+  FilePath:
+    Description: The path of the  file.
+    Type: String
+    Default: /home/ec2-user/userdata
+
+Resources:
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance" # 1 Quotes are unnecessary here - will they always be?
+    Properties:
+      ImageId: ami-c481fad3    # 2 Quotes removed from the example - still works
+      InstanceType: t2.nano
+      KeyName: 2ndwatch-sample-keypair
+      Tags:                    # 3 Here I switch to using single spaces
+       - Key: Role             # 4 Tag list item is inline
+         Value: Test Instance
+       -                       # 5 Next list item is block
+         Key: Owner
+         Value: 2ndWatch
+      BlockDeviceMappings:     # 6 Switch back to double spaces
+        -
+          DeviceName: /dev/sdm
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: 10
+      UserData:
+        Fn::Base64: !Sub |     # No more Fn::Join needed
+          #!/bin/bash
+          echo "Testing Userdata" > ${FilePath}
+          chown ec2-user.ec2-user ${FilePath}
